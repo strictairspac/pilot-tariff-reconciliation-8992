@@ -12,6 +12,7 @@ runs = Table(
     Column("created_at", BigInteger, nullable=False),
     Column("finished_at", BigInteger, nullable=True),
     Column("result", JSON(none_as_null=True), nullable=True),
+    Column("snapshot", JSON(none_as_null=True), nullable=True),
     Column("failure", String(320), nullable=True),
     Column("digest", String(64), nullable=True),
 )

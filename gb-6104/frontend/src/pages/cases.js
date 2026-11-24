@@ -5,6 +5,7 @@ import { table } from "../components/common/table.js";
 import { submit } from "../hooks/submit.js";
 import { navigate } from "../router/router.js";
 import { el } from "../utils/dom.js";
+import { supplementsSection } from "./supplements.js";
 
 function queueForm(config, selected) {
   const form = el("form", {class: "queue-form"},
@@ -55,5 +56,6 @@ export async function casesPage(config, user, route) {
         [el("p", {}, selected.description), operator ? queueForm(config, selected) : empty("当前账号可查看此资料。"),
           el("details", {}, el("summary", {}, "查看业务数据"), el("pre", {}, JSON.stringify(selected.payload, null, 2)))] :
         empty("先登记一条资料，再提交执行。")),
-      operator ? section("登记新资料", registration(config, selected)) : null));
+      operator ? section("登记新资料", registration(config, selected)) : null),
+    await supplementsSection(user));
 }

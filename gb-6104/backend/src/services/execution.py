@@ -8,6 +8,7 @@ from src.constants.job_state import JobState
 from src.domain import scenario
 from src.models.cases import cases
 from src.models.runs import runs
+from src.services import supplements
 from src.services.audit import record
 from src.utils.serial import content_digest
 
@@ -24,9 +25,22 @@ def service_one():
         if task is None:
             return False
         payload = db.scalar(select(cases.c.payload).where(cases.c.id == task["case_id"]))
+        # Use the version frozen at acceptance; never re-read live orders.
+        snapshot = task["snapshot"] or {"supplements": [], "blocked": []}
+        payload = {
+            **payload,
+            "supplements": snapshot.get("supplements", []),
+            "blocked_supplements": snapshot.get("blocked", []),
+        }
         try:
             result = scenario.run(payload, task["parameter"], db)
-            output = {"status": JobState.DONE, "result": result, "digest": content_digest(result)}
+            result = {**result, "blocked_supplements": snapshot.get("blocked", [])}
+            result["applied_supplements"] = sorted(set(result.get("applied_supplements", [])))
+            digest = content_digest(result)
+            supplements.record_applications(
+                db, task["id"], snapshot.get("supplements", []), result["applied_supplements"]
+            )
+            output = {"status": JobState.DONE, "result": result, "digest": digest}
         except Exception as exc:
             # Let the failed database transaction roll back before persisting the error.
             raise JobFailure(task["id"], exc) from exc

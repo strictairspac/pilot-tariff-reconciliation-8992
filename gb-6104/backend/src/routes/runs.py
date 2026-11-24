@@ -24,6 +24,12 @@ def run_detail(run_id: int):
         return runs.get(db, run_id)
 
 
+@router.get("/{run_id}/versions", dependencies=[Depends(identity)])
+def run_versions(run_id: int):
+    with engine.connect() as db:
+        return runs.versions(db, run_id)
+
+
 @router.get("/{run_id}/review", response_model=ReviewEntry | None, dependencies=[Depends(identity)])
 def review_detail(run_id: int):
     with engine.connect() as db:
@@ -43,6 +49,12 @@ def export(run_id: int):
         if run["status"] != JobState.DONE:
             raise HTTPException(409, "没有可导出的执行结果")
         run["review"] = reviews.get(db, run_id)
+        run["evidence"] = {
+            "versions": run["result"].get("versions", []),
+            "applied_supplements": run["result"].get("applied_supplements", []),
+            "blocked_supplements": run["result"].get("blocked_supplements", []),
+            "snapshot": run.get("snapshot"),
+        }
     return Response(canonical_json(run), media_type="application/json", headers={
         "Content-Disposition": f"attachment; filename=evidence-{run_id}.json",
     })

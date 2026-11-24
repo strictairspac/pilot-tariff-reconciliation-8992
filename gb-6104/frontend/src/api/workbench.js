@@ -10,6 +10,12 @@ export const api = {
   enqueue: (id, data) => request(`/cases/${id}/runs`, {method: "POST", data}),
   review: id => request(`/runs/${id}/review`),
   submitReview: (id, data) => request(`/runs/${id}/review`, {method: "POST", data}),
+  versions: id => request(`/runs/${id}/versions`),
   export: id => request(`/runs/${id}/export`, {raw: true}),
+  supplements: () => request("/supplements"),
+  supplement: id => request(`/supplements/${id}`),
+  registerSupplement: data => request("/supplements", {method: "POST", data}),
+  retrySupplement: id => request(`/supplements/${id}/retry`, {method: "POST"}),
+  retireSupplement: id => request(`/supplements/${id}/retire`, {method: "POST"}),
   audit: () => request("/audit", {signal: AbortSignal.timeout(5000)}),
 };

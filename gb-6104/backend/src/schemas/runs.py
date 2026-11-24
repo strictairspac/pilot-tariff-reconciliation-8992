@@ -16,5 +16,7 @@ class RunEntry(BaseModel):
     created_at: int
     finished_at: int | None
     result: dict | None
+    snapshot: dict | None = None
+    supplements: list[dict] = Field(default_factory=list)
     failure: str | None
     digest: str | None

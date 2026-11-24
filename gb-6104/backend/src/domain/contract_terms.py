@@ -5,6 +5,22 @@ ANCHOR_DAY = date(2026, 11, 1)
 TOKEN = re.compile(r"[A-Z0-9][A-Z0-9-]{0,29}")
 
 
+def code_value(value):
+    return _code(value)
+
+
+def integer_value(value, low, high):
+    return _integer(value, low, high)
+
+
+def date_value(value):
+    return _date(value)
+
+
+def end_value(value, start):
+    return _end(value, start)
+
+
 def _list(payload, field, keys):
     values = payload.get(field)
     if not isinstance(values, list) or not 1 <= len(values) <= 200:
